@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "llm-tts"
+version = "0.1.0"
+description = ""
+authors = ["Rodrigo Kobashikawa <rodrigokrosa@gmail.com>"]
+readme = "README.md"
+packages = [{include = "llm_tts"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pre-commit = "^3.7.0"
+ollama = "^0.1.9"
+ipykernel = "^6.29.4"
+transformers = "^4.40.1"
+torch = {version = "^2.0.1+cu118", source = "pytorch"}
+scipy = "^1.13.0"
+accelerate = "^0.29.3"
+optimum = "^1.19.1"
+requests = "^2.31.0"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
