@@ -17,6 +17,7 @@ scipy = "^1.13.0"
 accelerate = "^0.29.3"
 optimum = "^1.19.1"
 requests = "^2.31.0"
+sounddevice = "^0.4.6"
 
 [[tool.poetry.source]]
 name = "pytorch"

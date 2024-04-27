@@ -1,7 +1,7 @@
 import ollama
 import requests
 import scipy.io.wavfile as wavfile
-from IPython.display import Audio
+import sounddevice as sd
 
 
 def generate_llm_response(text: str):
@@ -15,7 +15,11 @@ def generate_llm_response(text: str):
             },
         ],
     )
-    return response["message"]["content"]
+    llm_response = response["message"]["content"]
+    llm_response = llm_response.replace("*", "")
+    print(f"\033[92mLLM\033[0m: \033[36m{llm_response}\033[0m")
+
+    return llm_response
 
 
 def generate_audio_wav(text: str, output_file: str):
@@ -48,5 +52,18 @@ def chat_tts(input_text: str):
     return data, rate
 
 
-data, rate = chat_tts("Oi, como vai você")
-Audio(data, rate=rate)
+if __name__ == "__main__":
+    while True:
+        try:
+            input_text = input("\033[34mUser\033[0m: ").strip()
+            if not input_text:
+                print("Input cannot be empty. Please try again.")
+                continue
+            if len(input_text) > 100:
+                print("Input is too long. Please enter 100 characters or less.")
+                continue
+            data, rate = chat_tts(input_text)
+            sd.play(data, rate)
+        except KeyboardInterrupt:
+            print("Exiting the program...")
+            break
