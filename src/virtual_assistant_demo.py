@@ -1,7 +1,9 @@
+import io
+
 import ollama
 import requests
-import scipy.io.wavfile as wavfile
 import sounddevice as sd
+from scipy.io import wavfile
 
 
 def generate_llm_response(text: str):
@@ -31,11 +33,20 @@ def generate_audio_wav(text: str, output_file: str):
             f.write(chunk)
 
 
+def generate_audio_array(text: str):
+    """Generate a WAV file from a text using the TTS API."""
+    url = "http://localhost:5000"
+    payload = {"text": text}
+    result = requests.get(url, params=payload)  # nosec
+    wav_io = io.BytesIO(result.content)
+    rate, data = wavfile.read(wav_io)
+    return rate, data
+
+
 def chat_tts(input_text: str):
     """Chat with the LLM model and generate a TTS response."""
     llm_response = generate_llm_response(input_text)
-    generate_audio_wav(llm_response, "../output/output.wav")
-    rate, data = wavfile.read("../output/output.wav")
+    rate, data = generate_audio_array(llm_response)
     sd.play(data, rate)
     sd.wait()
 
@@ -68,8 +79,7 @@ def streaming_chat_tts(text: str):
 
 def generate_streaming_audio(text: str):
     """Generate a WAV file from a text using the TTS API."""
-    generate_audio_wav(text, "../output/output.wav")
-    rate, data = wavfile.read("../output/output.wav")
+    rate, data = generate_audio_array(text)
     sd.play(data, rate)
     sd.wait()
 
