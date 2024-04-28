@@ -1,54 +1,9 @@
-import io
+import sys
 
 import ollama
-import requests
-import sounddevice as sd
-from scipy.io import wavfile
 
-
-def generate_llm_response(text: str):
-    """Generate a response from the LLM model."""
-    response = ollama.chat(
-        model="llama3",
-        messages=[
-            {
-                "role": "user",
-                "content": text,
-            },
-        ],
-    )
-    llm_response = response["message"]["content"]
-    llm_response = llm_response.replace("*", "")
-    print(f"\033[92mLLM\033[0m: \033[36m{llm_response}\033[0m")
-    return llm_response
-
-
-def generate_audio_wav(text: str, output_file: str):
-    """Generate a WAV file from a text using the TTS API."""
-    url = "http://localhost:5000"
-    payload = {"text": text}
-    result = requests.get(url, params=payload)  # nosec
-    with open(output_file, "wb") as f:
-        for chunk in result.iter_content(chunk_size=128):
-            f.write(chunk)
-
-
-def generate_audio_array(text: str):
-    """Generate a WAV file from a text using the TTS API."""
-    url = "http://localhost:5000"
-    payload = {"text": text}
-    result = requests.get(url, params=payload)  # nosec
-    wav_io = io.BytesIO(result.content)
-    rate, data = wavfile.read(wav_io)
-    return rate, data
-
-
-def chat_tts(input_text: str):
-    """Chat with the LLM model and generate a TTS response."""
-    llm_response = generate_llm_response(input_text)
-    rate, data = generate_audio_array(llm_response)
-    sd.play(data, rate)
-    sd.wait()
+sys.path.append("/home/koba/code/personal-assistant")
+from utils.audio import generate_streaming_audio
 
 
 def streaming_chat_tts(text: str):
@@ -67,21 +22,14 @@ def streaming_chat_tts(text: str):
         if llm_response.endswith((".", "!", "?")):
             if current_group.strip():
                 groups.append(current_group)
-                print(current_group, end="", flush=True)
+                print(f"\033[36m{current_group}\033[0m", end="", flush=True)
                 generate_streaming_audio(current_group)
             current_group = ""
     if current_group.strip():
         groups.append(current_group)
-        print(current_group)
+        print(f"\033[36m{current_group}\033[0m")
         generate_streaming_audio(current_group)
     return groups
-
-
-def generate_streaming_audio(text: str):
-    """Generate a WAV file from a text using the TTS API."""
-    rate, data = generate_audio_array(text)
-    sd.play(data, rate)
-    sd.wait()
 
 
 if __name__ == "__main__":
@@ -95,6 +43,7 @@ if __name__ == "__main__":
             if len(input_text) > 100:
                 print("Entrada muito longa. Por favor, entre com menos de 100 caracteres.")
                 continue
+            print("\033[92mLLM\033[0m: ", end="")
             streaming_chat_tts(input_text)
         except KeyboardInterrupt:
             print("\n\nSaindo do programa...")
