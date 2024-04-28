@@ -1,20 +1,20 @@
 # Steps when initiating a new ML python project
 
-## 1. Create folder structure
+1. Create folder structure
 
-## 2. Configure pyenv
+2. Configure pyenv
 
 ```bash
 pyenv local 3.10
 ```
 
-## 3. Initialize poetry
+3. Initialize poetry
 
 ```bash
 poetry init
 ```
 
-## 4. Initialize pre-commit
+4. Initialize pre-commit
 
 ```bash
 pre-commit install
