@@ -1,15 +1,20 @@
 import sys
 
-import ollama
+from ollama import Client
 
-sys.path.append("/home/koba/code/personal-assistant")
+sys.path.append("/home/personal/personal-assistant")
 from utils.audio import generate_streaming_audio
 
 
 def streaming_chat_tts(text: str):
     """Generate a response from the LLM model."""
-    stream = ollama.chat(
-        model="llama3",
+    client = Client(
+        # host="http://192.168.15.8:11434"
+        host="http://127.0.0.1:11434"
+    )
+
+    stream = client.chat(
+        model="llama3.2:1b-instruct-q4_K_M",
         messages=[{"role": "user", "content": text}],
         stream=True,
     )

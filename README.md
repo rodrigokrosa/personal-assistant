@@ -48,7 +48,7 @@ pip install -r requirements_http.txt
 
 5. Download onxx pretrained models from the repository [\[link\]](https://github.com/rhasspy/piper/blob/master/VOICES.md)
 
-6. Run http_server with:
+6. Run http_server with at the folder with the model downloaded:
 
 ```
 screen python -m piper.http_server --model <model_name>
@@ -72,4 +72,33 @@ screen -S llm ollama serve
 
 ```
 ollama run llama3
+```
+
+# Raspberry pi config:
+
+```
+curl https://pyenv.run | bash
+```
+
+```
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+```
+nano ~/.bashrc
+```
+
+```
+# Pyenv setup
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+```
+
+```
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+```
+source ~/.bashrc
 ```
