@@ -102,3 +102,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ```
 source ~/.bashrc
 ```
+
+```
+sudo apt install portaudio19-dev
+```

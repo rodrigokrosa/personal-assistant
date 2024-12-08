@@ -2,7 +2,7 @@ import sys
 
 from ollama import Client
 
-sys.path.append("/home/personal/personal-assistant")
+sys.path.append("/home/isi/code/personal-assistant")
 from utils.audio import generate_streaming_audio
 
 
@@ -13,28 +13,44 @@ def streaming_chat_tts(text: str):
         host="http://127.0.0.1:11434"
     )
 
+    system_message = (
+        "You should always give reasonably short answers. Always respond in Brazilian Portuguese."
+    )
+
     stream = client.chat(
-        model="llama3.2:1b-instruct-q4_K_M",
-        messages=[{"role": "user", "content": text}],
+        # model="llama3.2:1b-instruct-q4_K_M",
+        model="llama3.2:3b",
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": text},
+        ],
         stream=True,
     )
-    groups = []
+
+    punctuations = [".", "!", "?", ":", ";"]
+
     current_group = ""
     for chunk in stream:
         llm_response = chunk["message"]["content"]
         llm_response = llm_response.replace("*", "")
+
+        # Process the chunk to split at punctuation marks
+        while any(punct in llm_response for punct in punctuations):
+            for punct in punctuations:
+                if punct in llm_response:
+                    part, llm_response = llm_response.split(punct, 1)
+                    current_group += part + punct
+                    if current_group.strip():
+                        print(f"\033[36m{current_group}\033[0m", end="", flush=True)
+                        generate_streaming_audio(current_group)
+                    current_group = ""
+                    break
+
         current_group += llm_response
-        if llm_response.endswith((".", "!", "?")):
-            if current_group.strip():
-                groups.append(current_group)
-                print(f"\033[36m{current_group}\033[0m", end="", flush=True)
-                generate_streaming_audio(current_group)
-            current_group = ""
+
     if current_group.strip():
-        groups.append(current_group)
         print(f"\033[36m{current_group}\033[0m")
         generate_streaming_audio(current_group)
-    return groups
 
 
 if __name__ == "__main__":
