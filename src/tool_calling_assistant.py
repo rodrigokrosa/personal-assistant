@@ -1,8 +1,10 @@
 import sys
 
+from faster_whisper import WhisperModel
 from ollama import Client
 
 sys.path.append("/home/isi/code/personal-assistant")
+from detect_speech_silence import record_audio
 from utils.audio import generate_streaming_audio
 
 
@@ -85,7 +87,6 @@ def tool_chat_tts(text: str):
                 print("Function", tool.function.name, "not found")
 
         # Add the function response to messages for the model to use
-        messages.append(response.message)
         messages.append({"role": "tool", "content": str(output), "name": tool.function.name})
 
         messages.append(
@@ -102,8 +103,6 @@ def tool_chat_tts(text: str):
     else:
         print("<No tool calls returned from model>")
         final_response = client.chat(
-            # host="http://192.168.15.8:11434",
-            host="http://127.0.0.1:11434",
             model="llama3.2:3b",
             messages=[
                 {"role": "system", "content": system_message},
@@ -138,15 +137,31 @@ if __name__ == "__main__":
     print("Bem vindo ao demo do assistente virtual!")
     while True:
         try:
-            input_text = input("\n\033[34mUser\033[0m: ").strip()
+            record_audio("output/audio.wav", sample_rate=16000, silence_threshold=2)
+
+            model = WhisperModel("small", device="cpu", compute_type="int8")
+            segments, info = model.transcribe(
+                "output/audio.wav", beam_size=5, vad_filter=True, language="pt"
+            )
+
+            input_text = [segment.text for segment in segments]
+
             if not input_text:
-                print("Entrada não pode ser vazia. Por favor, tente novamente.")
+                print("Nenhuma entrada detectada. Por favor, tente novamente.")
                 continue
-            if len(input_text) > 100:
-                print("Entrada muito longa. Por favor, entre com menos de 100 caracteres.")
-                continue
+            else:
+                input_text = input_text[0].strip()
+                print("\n\033[34mUser\033[0m: ", input_text)
+
+            # input_text = input("\n\033[34mUser\033[0m: ").strip()
+            # if not input_text:
+            #     print("Entrada não pode ser vazia. Por favor, tente novamente.")
+            #     continue
+
+            # LLM Response
             print("\033[92mLLM\033[0m: ", end="")
             tool_chat_tts(input_text)
+
         except KeyboardInterrupt:
             print("\n\nSaindo do programa...")
             break
