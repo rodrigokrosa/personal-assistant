@@ -1,11 +1,22 @@
 import sys
 
+# import RPi.GPIO as GPIO
 from faster_whisper import WhisperModel
 from ollama import Client
 
 sys.path.append("/home/isi/code/personal-assistant")
+
 from detect_speech_silence import record_audio
 from utils.audio import generate_streaming_audio
+
+# # Set up the GPIO pin numbering
+# GPIO.setmode(GPIO.BCM)
+
+# # Define the GPIO pin number where the LED is connected
+# LED_PIN = 18
+
+# # Set up the GPIO pin as an output
+# GPIO.setup(LED_PIN, GPIO.OUT)
 
 
 def add_two_numbers(a: int, b: int) -> int:
@@ -31,8 +42,10 @@ def control_lights(turn_on: bool) -> str:
       str: Mensagem indicando se as luzes foram ligadas ou desligadas.
     """
     if turn_on:
+        # GPIO.output(LED_PIN, GPIO.HIGH)
         return "The lights are now on."
     else:
+        # GPIO.output(LED_PIN, GPIO.LOW)
         return "The lights are now off."
 
 
@@ -163,5 +176,9 @@ if __name__ == "__main__":
             tool_chat_tts(input_text)
 
         except KeyboardInterrupt:
+            # Clean up GPIO settings when the script exits
+            # import atexit
+
+            # atexit.register(GPIO.cleanup)
             print("\n\nSaindo do programa...")
             break

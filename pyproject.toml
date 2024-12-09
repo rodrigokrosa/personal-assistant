@@ -22,6 +22,7 @@ pyaudio = "^0.2.14"
 pydub = "^0.25.1"
 webrtcvad = "^2.0.10"
 faster-whisper = "^1.1.0"
+rpi-gpio = "^0.7.1"
 
 [[tool.poetry.source]]
 name = "pytorch"
