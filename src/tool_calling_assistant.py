@@ -1,51 +1,49 @@
 import sys
 
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from faster_whisper import WhisperModel
 from ollama import Client
 
-sys.path.append("/home/isi/code/personal-assistant")
+sys.path.append("/home/personal/personal-assistant")
 
 from detect_speech_silence import record_audio
 from utils.audio import generate_streaming_audio
 
-# # Set up the GPIO pin numbering
-# GPIO.setmode(GPIO.BCM)
-
-# # Define the GPIO pin number where the LED is connected
-# LED_PIN = 18
-
-# # Set up the GPIO pin as an output
-# GPIO.setup(LED_PIN, GPIO.OUT)
-
 
 def add_two_numbers(a: int, b: int) -> int:
-    """Soma dois numeros inteiros.
+    """Sum two integer numbers.
 
     Args:
-      a (int): O primeiro numero inteiro
-      b (int): O segundo numero inteiro
+      a (int): The first integer number
+      b (int): The second integer number
 
     Returns:
-      int: A soma dos dois numeros inteiros
+      int: Sum of two integer numbers
     """
     return int(a) + int(b)
 
 
 def control_lights(turn_on: bool) -> str:
-    """Função para controlar as luzes, ligando ou desligando.
+    """Function to control the lights, turning them on and off.
 
     Args:
-      turn_on (bool): Se True, liga as luzes. Se False, desliga as luzes.
+      turn_on (bool): If True, turn on the lights. If False, turn off the lights.
 
     Returns:
-      str: Mensagem indicando se as luzes foram ligadas ou desligadas.
+      str: Message indicating if the lights were turned on or off.
     """
+    if isinstance(turn_on, str):
+        if turn_on.lower().strip() == "true":
+            turn_on = True
+        elif turn_on.lower().strip() == "false":
+            turn_on = False
+        else:
+            return "Invalid argument"
     if turn_on:
-        # GPIO.output(LED_PIN, GPIO.HIGH)
+        GPIO.output(LED_PIN, GPIO.HIGH)
         return "The lights are now on."
     else:
-        # GPIO.output(LED_PIN, GPIO.LOW)
+        GPIO.output(LED_PIN, GPIO.LOW)
         return "The lights are now off."
 
 
@@ -66,8 +64,8 @@ system_message = (
 def tool_chat_tts(text: str):
     """Generate a response from the LLM model."""
     client = Client(
-        # host="http://192.168.15.8:11434",
-        host="http://127.0.0.1:11434"
+        host="http://192.168.15.6:11434",
+        # host="http://127.0.0.1:11434"
     )
 
     messages = []
@@ -83,7 +81,7 @@ def tool_chat_tts(text: str):
         tools=[add_two_numbers, control_lights],
     )
 
-    punctuations = [".", "!", "?", ":", ";"]
+    punctuations = [".", "!", "?", ":", ";", "..."]
 
     messages.append(response["message"])
 
@@ -148,11 +146,22 @@ def tool_chat_tts(text: str):
 
 if __name__ == "__main__":
     print("Bem vindo ao demo do assistente virtual!")
+    model = WhisperModel("small", device="cpu", compute_type="int8")
+
+    # Set up the GPIO pin numbering
+    GPIO.setmode(GPIO.BCM)
+
+    # Define the GPIO pin number where the LED is connected
+    LED_PIN = 18
+
+    # Set up the GPIO pin as an output
+    GPIO.setup(LED_PIN, GPIO.OUT)
+    GPIO.output(LED_PIN, GPIO.LOW)
+
     while True:
         try:
-            record_audio("output/audio.wav", sample_rate=16000, silence_threshold=2)
+            record_audio("output/audio.wav", sample_rate=16000, silence_threshold=1.5)
 
-            model = WhisperModel("small", device="cpu", compute_type="int8")
             segments, info = model.transcribe(
                 "output/audio.wav", beam_size=5, vad_filter=True, language="pt"
             )
@@ -177,8 +186,8 @@ if __name__ == "__main__":
 
         except KeyboardInterrupt:
             # Clean up GPIO settings when the script exits
-            # import atexit
+            import atexit
 
-            # atexit.register(GPIO.cleanup)
+            atexit.register(GPIO.cleanup)
             print("\n\nSaindo do programa...")
             break
