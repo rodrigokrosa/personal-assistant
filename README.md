@@ -74,6 +74,37 @@ ollama serve
 ollama run llama3.2:3b
 ```
 
+4. Get llama modelfile
+
+```bash
+ollama show llama3.2:3b --modelfile > Modelfile3.2
+```
+
+5. Modify llama modelfile tool prompt
+
+```
+...
+
+{{ range $.Tools }}
+{{- . }}
+{{ end }}
+Question: {{ .Content }}<|eot_id|>
+{{- else }}
+
+Analyse the given prompt and decide whether or not it can be answered by a tool.  If it can, use the following functions to respond with a JSON for a function call with its proper arguments that best answers the given prompt.  Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. Do not use variables.
+
+{{ .Content }}<|eot_id|>
+{{- end }}{{ if $last }}<|start_header_id|>assistant<|end_header_id|>
+
+...
+```
+
+6. Create a new model using this modified modelfile
+
+```bash
+ollama create llama3.2:3b-tool -f Modelfile3.2
+```
+
 # Raspberry pi config:
 
 1. Install Pyenv to manage python versions

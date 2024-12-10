@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "llm_tts"}]
 
 [tool.poetry.dependencies]
-python = "3.10.12"
+python = "^3.10.12"
 pre-commit = "^3.7.0"
 ollama = "^0.4"
 ipykernel = "^6.29.4"

@@ -1,10 +1,11 @@
 import sys
 
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 from faster_whisper import WhisperModel
 from ollama import Client
 
-sys.path.append("/home/personal/personal-assistant")
+# sys.path.append("/home/personal/personal-assistant")
+sys.path.append("/home/isi/code/personal-assistant")
 
 from detect_speech_silence import record_audio
 from utils.audio import generate_streaming_audio
@@ -40,10 +41,10 @@ def control_lights(turn_on: bool) -> str:
         else:
             return "Invalid argument"
     if turn_on:
-        GPIO.output(LED_PIN, GPIO.HIGH)
+        # GPIO.output(LED_PIN, GPIO.HIGH)
         return "The lights are now on."
     else:
-        GPIO.output(LED_PIN, GPIO.LOW)
+        # GPIO.output(LED_PIN, GPIO.LOW)
         return "The lights are now off."
 
 
@@ -64,8 +65,8 @@ system_message = (
 def tool_chat_tts(text: str):
     """Generate a response from the LLM model."""
     client = Client(
-        host="http://192.168.15.6:11434",
-        # host="http://127.0.0.1:11434"
+        # host="http://192.168.15.6:11434",
+        host="http://127.0.0.1:11434"
     )
 
     messages = []
@@ -75,7 +76,8 @@ def tool_chat_tts(text: str):
 
     response = client.chat(
         # model="llama3.2:1b-instruct-q4_K_M",
-        model="llama3.2:3b-tool",
+        model="llama3.1:8b-tool",
+        # model="llama3.2:3b-tool",
         messages=messages,
         stream=False,
         tools=[add_two_numbers, control_lights],
@@ -109,12 +111,13 @@ def tool_chat_tts(text: str):
         )
 
         # Get final response from model with function outputs
-        final_response = client.chat(model="llama3.2:3b", messages=messages)
+        final_response = client.chat(model="llama3.1", messages=messages)
         llm_response = final_response["message"]["content"]
     else:
         print("<No tool calls returned from model>")
         final_response = client.chat(
-            model="llama3.2:3b",
+            model="llama3.1",
+            # model="llama3.2:3b",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": text},
@@ -146,24 +149,26 @@ def tool_chat_tts(text: str):
 
 if __name__ == "__main__":
     print("Bem vindo ao demo do assistente virtual!")
-    model = WhisperModel("small", device="cpu", compute_type="int8")
+    model = WhisperModel("large-v3", device="cpu", compute_type="int8")
 
-    # Set up the GPIO pin numbering
-    GPIO.setmode(GPIO.BCM)
+    # # Set up the GPIO pin numbering
+    # GPIO.setmode(GPIO.BCM)
 
-    # Define the GPIO pin number where the LED is connected
-    LED_PIN = 18
+    # # Define the GPIO pin number where the LED is connected
+    # LED_PIN = 18
 
-    # Set up the GPIO pin as an output
-    GPIO.setup(LED_PIN, GPIO.OUT)
-    GPIO.output(LED_PIN, GPIO.LOW)
+    # # Set up the GPIO pin as an output
+    # GPIO.setup(LED_PIN, GPIO.OUT)
+    # GPIO.output(LED_PIN, GPIO.LOW)
 
     while True:
         try:
             record_audio("output/audio.wav", sample_rate=16000, silence_threshold=1.5)
 
             segments, info = model.transcribe(
-                "output/audio.wav", beam_size=5, vad_filter=True, language="pt"
+                "output/audio.wav",
+                beam_size=5,
+                vad_filter=True,  # , language="pt"
             )
 
             input_text = [segment.text for segment in segments]
@@ -186,8 +191,8 @@ if __name__ == "__main__":
 
         except KeyboardInterrupt:
             # Clean up GPIO settings when the script exits
-            import atexit
+            # import atexit
 
-            atexit.register(GPIO.cleanup)
+            # atexit.register(GPIO.cleanup)
             print("\n\nSaindo do programa...")
             break

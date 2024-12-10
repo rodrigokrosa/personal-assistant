@@ -18,13 +18,15 @@ You are a helpful assistant with tool calling capabilities.
 {{- if eq .Role "user" }}<|start_header_id|>user<|end_header_id|>
 {{- if and $.Tools $last }}
 
-Analyse the given prompt and decide whether or not it can be answered by a tool.  If it can, use the following functions to respond with a JSON for a function call with its proper arguments that best answers the given prompt.  Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. Do not use variables.
+
 
 {{ range $.Tools }}
 {{- . }}
 {{ end }}
 {{ .Content }}<|eot_id|>
 {{- else }}
+
+Analyse the given prompt and decide whether or not it can be answered by a tool.  If it can, use the following functions to respond with a JSON for a function call with its proper arguments that best answers the given prompt.  Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. Do not use variables.
 
 {{ .Content }}<|eot_id|>
 {{- end }}{{ if $last }}<|start_header_id|>assistant<|end_header_id|>
