@@ -83,8 +83,6 @@ def tool_chat_tts(text: str):
         tools=[add_two_numbers, control_lights],
     )
 
-    punctuations = [".", "!", "?", ":", ";", "..."]
-
     messages.append(response["message"])
 
     if response.message.tool_calls:
@@ -126,6 +124,8 @@ def tool_chat_tts(text: str):
         llm_response = final_response["message"]["content"]
 
     llm_response = llm_response.replace("*", "")
+
+    punctuations = [".", "!", "?", ":", ";"]
 
     current_group = ""
     # Process the chunk to split at punctuation marks
@@ -172,12 +172,11 @@ if __name__ == "__main__":
             )
 
             input_text = [segment.text for segment in segments]
-
             if not input_text:
                 print("Nenhuma entrada detectada. Por favor, tente novamente.")
                 continue
             else:
-                input_text = input_text[0].strip()
+                input_text = "".join(input_text).strip()
                 print("\n\033[34mUser\033[0m: ", input_text)
 
             # input_text = input("\n\033[34mUser\033[0m: ").strip()
